@@ -1,17 +1,21 @@
 
-# Persistence (persistence)
+# Persistence (`persistence`)
 
-Persist userland data across dev containers by mounting host-side volumes.
+A Dev Container Feature that persists AI tool configurations, credentials, and custom executables across container rebuilds.
+Data is stored in a named Docker volume (`persistence`) and survives container recreation.
 
-## Example Usage
+## How It Works
+
+1. **At install time**: Creates `/usr/local/share/persistence/<name>` directories and symlinks them to the corresponding paths in the home directory.
+2. **At container start** (`postStartCommand`): Symlinks executables found in `/usr/local/share/persistence/bin/` into `~/.local/bin/`. Existing files are not overwritten.
+
+## Usage
 
 ```json
 "features": {
     "ghcr.io/<owner>/<repo>/persistence:1": {
         "claude": true,
         "codex": true,
-        "gemini": false,
-        "copilot-cli": true,
         "gh-cli": true
     }
 }
@@ -19,24 +23,39 @@ Persist userland data across dev containers by mounting host-side volumes.
 
 ## Options
 
-| Options Id | Description | Type | Default Value |
-|-----|-----|-----|-----|
-| claude | Mount Claude Code config (`~/.claude`) via volume. | boolean | false |
-| codex | Mount Codex config (`~/.codex`) via volume. | boolean | false |
-| gemini | Mount Gemini Code Assist config and cache directories via volumes. | boolean | false |
-| copilot-cli | Mount GitHub Copilot CLI config (`~/.copilot`) via volume. | boolean | false |
-| gh-cli | Mount GitHub CLI config (`~/.config/gh`) via volume. | boolean | false |
+| Option | Description | Type | Default |
+|--------|-------------|------|---------|
+| `claude` | Persist Claude Code configuration (`~/.claude`) in the volume | boolean | false |
+| `codex` | Persist OpenAI Codex CLI configuration (`~/.codex`) in the volume | boolean | false |
+| `gemini` | Persist Gemini Code Assist configuration (`~/.gemini`) and cache (`~/.cache/google-vscode-extension`, `~/.cache/cloud-code`) in the volume | boolean | false |
+| `copilot-cli` | Persist GitHub Copilot CLI configuration (`~/.copilot`) in the volume | boolean | false |
+| `gh-cli` | Persist GitHub CLI credentials (`~/.config/gh`) in the volume | boolean | false |
 
-## Persistent bin
+## Volume Structure
 
-- Use `/usr/local/share/persistence/bin` as a persistent location for custom executables.
-- On container start, files in that directory are symlinked into `~/.local/bin`.
-- If `~/.local/bin/<name>` already exists as a regular file, it is kept as-is and not overwritten.
-- Ensure `~/.local/bin` is in your PATH, for example: `export PATH="$HOME/.local/bin:$PATH"`.
-- If you add files in the persistent bin later, restart the container to resync links.
+```
+/usr/local/share/persistence/   ← Docker volume mount point
+  bin/                          ← Place custom executables to persist here
+  claude/                       ← Linked to ~/.claude
+  codex/                        ← Linked to ~/.codex
+  gemini/                       ← Linked to ~/.gemini
+  google-vscode-extension/      ← Linked to ~/.cache/google-vscode-extension
+  cloud-code/                   ← Linked to ~/.cache/cloud-code
+  copilot-cli/                  ← Linked to ~/.copilot
+  gh-cli/                       ← Linked to ~/.config/gh
+```
 
+## Persistent bin (`persistence/bin`)
 
+Files placed in `/usr/local/share/persistence/bin/` are automatically symlinked into `~/.local/bin/` at container start.
+
+- Existing files at `~/.local/bin/<name>` will not be overwritten.
+- Ensure `~/.local/bin` is included in your PATH:
+  ```sh
+  export PATH="$HOME/.local/bin:$PATH"
+  ```
+- If you add files after the container has started, restart the container to re-sync the links.
 
 ---
 
-_Note: Keep this README in sync with `devcontainer-feature.json`._
+_Keep this file in sync with `devcontainer-feature.json`._
