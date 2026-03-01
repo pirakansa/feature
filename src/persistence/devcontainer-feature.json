@@ -1,0 +1,41 @@
+{
+    "name": "persistence",
+    "id": "persistence",
+    "version": "0.1.4",
+    "description": "A feature to persist userland data across containers",
+    "options": {
+        "claude": {
+            "type": "boolean",
+            "default": false,
+            "description": "Mount Claude Code config (`~/.claude`) via volume."
+        },
+        "codex": {
+            "type": "boolean",
+            "default": false,
+            "description": "Mount Codex config (`~/.codex`) via volume."
+        },
+        "gemini": {
+            "type": "boolean",
+            "default": false,
+            "description": "Mount Gemini Code Assist config (`~/.gemini`) and caches (`~/.cache/google-vscode-extension`, `~/.cache/cloud-code`) via volumes."
+        },
+        "copilot-cli": {
+            "type": "boolean",
+            "default": false,
+            "description": "Mount GitHub Copilot CLI config (`~/.copilot`) via volume."
+        },
+        "gh-cli": {
+            "type": "boolean",
+            "default": false,
+            "description": "Mount GitHub CLI config (`~/.config/gh`) via volume."
+        }
+    },
+    "mounts": [
+        {
+            "source": "persistence",
+            "target": "/usr/local/share/persistence",
+            "type": "volume"
+        }
+    ],
+    "postStartCommand": "/usr/local/bin/persistence-sync-bin"
+}

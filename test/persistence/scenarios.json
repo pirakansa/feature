@@ -1,0 +1,29 @@
+{
+    "default": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "remoteUser": "vscode",
+        "features": {
+            "persistence": {
+                "codex": true
+            }
+        }
+    },
+    "codex": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "remoteUser": "root",
+        "features": {
+            "persistence": {
+                "codex": true
+            }
+        }
+    },
+    "gh-cli": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "remoteUser": "root",
+        "features": {
+            "persistence": {
+                "gh-cli": true
+            }
+        }
+    }
+}
