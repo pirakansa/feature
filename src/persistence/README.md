@@ -9,6 +9,8 @@ Data is stored in a named Docker volume (`persistence`) and survives container r
 1. **At install time**: Creates `/usr/local/share/persistence/<name>` directories and symlinks them to the corresponding paths in the home directory.
 2. **At container start** (`postStartCommand`): Symlinks executables found in `/usr/local/share/persistence/bin/` into `~/.local/bin/`. Existing files are not overwritten.
 
+If a target path already exists (for example `~/.codex` or `~/.config/gh`), this feature skips creating that symlink and leaves the existing path unchanged.
+
 ## Usage
 
 ```json
@@ -16,7 +18,8 @@ Data is stored in a named Docker volume (`persistence`) and survives container r
     "ghcr.io/<owner>/<repo>/persistence:1": {
         "claude": true,
         "codex": true,
-        "gh-cli": true
+        "gh-cli": true,
+        "opencode": true
     }
 }
 ```
@@ -30,6 +33,7 @@ Data is stored in a named Docker volume (`persistence`) and survives container r
 | `gemini` | Persist Gemini Code Assist configuration (`~/.gemini`) and cache (`~/.cache/google-vscode-extension`, `~/.cache/cloud-code`) in the volume | boolean | false |
 | `copilot-cli` | Persist GitHub Copilot CLI configuration (`~/.copilot`) in the volume | boolean | false |
 | `gh-cli` | Persist GitHub CLI credentials (`~/.config/gh`) in the volume | boolean | false |
+| `opencode` | Persist Opencode configuration (`~/.config/opencode`) in the volume | boolean | false |
 
 ## Volume Structure
 
@@ -43,6 +47,7 @@ Data is stored in a named Docker volume (`persistence`) and survives container r
   cloud-code/                   ← Linked to ~/.cache/cloud-code
   copilot-cli/                  ← Linked to ~/.copilot
   gh-cli/                       ← Linked to ~/.config/gh
+  opencode/                     ← Linked to ~/.config/opencode
 ```
 
 ## Persistent bin (`persistence/bin`)
