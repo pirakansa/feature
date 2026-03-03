@@ -52,7 +52,8 @@ initialize_persistence_layout() {
         "google-vscode-extension" \
         "cloud-code" \
         "copilot-cli" \
-        "gh-cli"
+        "gh-cli" \
+        "opencode"
     do
         install -d -m 777 "$PERSIST_ROOT/$persist_dir_name"
         chmod -R 777 "$PERSIST_ROOT/$persist_dir_name"
@@ -87,6 +88,30 @@ install_persistent_bin_sync_command() {
 set -e
 
 persist_bin_dir="/usr/local/share/persistence/bin"
+persist_root_dir="/usr/local/share/persistence"
+
+ensure_persistence_layout() {
+    mkdir -p "$persist_root_dir"
+    chmod 777 "$persist_root_dir" || true
+
+    for persist_dir_name in \
+        "bin" \
+        "claude" \
+        "codex" \
+        "gemini" \
+        "google-vscode-extension" \
+        "cloud-code" \
+        "copilot-cli" \
+        "gh-cli" \
+        "opencode"
+    do
+        persist_path="$persist_root_dir/$persist_dir_name"
+        mkdir -p "$persist_path"
+        chmod 777 "$persist_path" || true
+    done
+}
+
+ensure_persistence_layout
 
 if [ -z "$HOME" ] || [ ! -d "$persist_bin_dir" ]; then
     exit 0
@@ -140,6 +165,10 @@ fi
 
 if is_enabled "${GH_CLI:-false}"; then
     link_persistence "gh-cli" ".config/gh"
+fi
+
+if is_enabled "${OPENCODE:-false}"; then
+    link_persistence "opencode" ".config/opencode"
 fi
 
 install_persistent_bin_sync_command

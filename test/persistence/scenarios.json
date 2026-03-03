@@ -25,5 +25,14 @@
                 "gh-cli": true
             }
         }
+    },
+    "opencode": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "remoteUser": "root",
+        "features": {
+            "persistence": {
+                "opencode": true
+            }
+        }
     }
 }

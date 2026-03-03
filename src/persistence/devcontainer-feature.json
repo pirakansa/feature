@@ -28,6 +28,11 @@
             "type": "boolean",
             "default": false,
             "description": "Mount GitHub CLI config (`~/.config/gh`) via volume."
+        },
+        "opencode": {
+            "type": "boolean",
+            "default": false,
+            "description": "Mount Opencode config (`~/.config/opencode`) via volume."
         }
     },
     "mounts": [

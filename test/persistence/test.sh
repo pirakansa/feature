@@ -3,7 +3,7 @@
 # Auto-generated test: Verifies persistence installed with all options set to their default values (false).
 #
 # All options from devcontainer-feature.json are applied with their default values.
-# That is, claude/codex/gemini/copilot-cli/gh-cli are all disabled (false).
+# That is, claude/codex/gemini/copilot-cli/gh-cli/opencode are all disabled (false).
 #
 # How to run:
 #   devcontainer features test \
@@ -33,6 +33,7 @@ check "persistence google-vscode-extension exists" bash -c "[ -d /usr/local/shar
 check "persistence cloud-code exists" bash -c "[ -d /usr/local/share/persistence/cloud-code ]"
 check "persistence copilot-cli exists" bash -c "[ -d /usr/local/share/persistence/copilot-cli ]"
 check "persistence gh-cli exists" bash -c "[ -d /usr/local/share/persistence/gh-cli ]"
+check "persistence opencode exists" bash -c "[ -d /usr/local/share/persistence/opencode ]"
 check "user local bin exists" bash -c "[ -d \"$HOME/.local/bin\" ]"
 check "user local bin owner" bash -c 'owner="$(stat -c "%U:%G" "$HOME/.local/bin")"; [ "$owner" = "$(id -un):$(id -gn)" ]'
 
