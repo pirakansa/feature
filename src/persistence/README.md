@@ -33,7 +33,7 @@ If a target path already exists (for example `~/.codex` or `~/.config/gh`), this
 | `gemini` | Persist Gemini Code Assist configuration (`~/.gemini`) and cache (`~/.cache/google-vscode-extension`, `~/.cache/cloud-code`) in the volume | boolean | false |
 | `copilot-cli` | Persist GitHub Copilot CLI configuration (`~/.copilot`) in the volume | boolean | false |
 | `gh-cli` | Persist GitHub CLI credentials (`~/.config/gh`) in the volume | boolean | false |
-| `opencode` | Persist Opencode configuration (`~/.config/opencode`) in the volume | boolean | false |
+| `opencode` | Persist Opencode configuration (`~/.config/opencode`) and data (`~/.local/share/opencode`) in separate volume paths | boolean | false |
 
 ## Volume Structure
 
@@ -47,7 +47,8 @@ If a target path already exists (for example `~/.codex` or `~/.config/gh`), this
   cloud-code/                   ← Linked to ~/.cache/cloud-code
   copilot-cli/                  ← Linked to ~/.copilot
   gh-cli/                       ← Linked to ~/.config/gh
-  opencode/                     ← Linked to ~/.config/opencode
+  opencode-config/              ← Linked to ~/.config/opencode
+  opencode-local-share/         ← Linked to ~/.local/share/opencode
 ```
 
 ## Persistent bin (`persistence/bin`)

@@ -53,7 +53,8 @@ initialize_persistence_layout() {
         "cloud-code" \
         "copilot-cli" \
         "gh-cli" \
-        "opencode"
+        "opencode-config" \
+        "opencode-local-share"
     do
         install -d -m 777 "$PERSIST_ROOT/$persist_dir_name"
         chmod -R 777 "$PERSIST_ROOT/$persist_dir_name"
@@ -103,7 +104,8 @@ ensure_persistence_layout() {
         "cloud-code" \
         "copilot-cli" \
         "gh-cli" \
-        "opencode"
+        "opencode-config" \
+        "opencode-local-share"
     do
         persist_path="$persist_root_dir/$persist_dir_name"
         mkdir -p "$persist_path"
@@ -168,7 +170,8 @@ if is_enabled "${GH_CLI:-false}"; then
 fi
 
 if is_enabled "${OPENCODE:-false}"; then
-    link_persistence "opencode" ".config/opencode"
+    link_persistence "opencode-config" ".config/opencode"
+    link_persistence "opencode-local-share" ".local/share/opencode"
 fi
 
 install_persistent_bin_sync_command
