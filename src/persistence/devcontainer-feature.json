@@ -32,7 +32,7 @@
         "opencode": {
             "type": "boolean",
             "default": false,
-            "description": "Mount Opencode config (`~/.config/opencode`) via volume."
+            "description": "Mount Opencode config (`~/.config/opencode`) and data (`~/.local/share/opencode`) via separate volume paths."
         }
     },
     "mounts": [

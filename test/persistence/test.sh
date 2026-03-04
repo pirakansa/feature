@@ -33,7 +33,8 @@ check "persistence google-vscode-extension exists" bash -c "[ -d /usr/local/shar
 check "persistence cloud-code exists" bash -c "[ -d /usr/local/share/persistence/cloud-code ]"
 check "persistence copilot-cli exists" bash -c "[ -d /usr/local/share/persistence/copilot-cli ]"
 check "persistence gh-cli exists" bash -c "[ -d /usr/local/share/persistence/gh-cli ]"
-check "persistence opencode exists" bash -c "[ -d /usr/local/share/persistence/opencode ]"
+check "persistence opencode-config exists" bash -c "[ -d /usr/local/share/persistence/opencode-config ]"
+check "persistence opencode-local-share exists" bash -c "[ -d /usr/local/share/persistence/opencode-local-share ]"
 check "user local bin exists" bash -c "[ -d \"$HOME/.local/bin\" ]"
 check "user local bin owner" bash -c 'owner="$(stat -c "%U:%G" "$HOME/.local/bin")"; [ "$owner" = "$(id -un):$(id -gn)" ]'
 
