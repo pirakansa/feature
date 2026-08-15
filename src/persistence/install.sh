@@ -26,26 +26,12 @@ is_enabled() {
     esac
 }
 
-initialize_target_local_bin() {
-    target_local_dir="$TARGET_HOME/.local"
-    target_bin_dir="$target_local_dir/bin"
-    target_uid="$(stat -c '%u' "$TARGET_HOME")"
-    target_gid="$(stat -c '%g' "$TARGET_HOME")"
-
-    install -d -m 755 "$target_local_dir"
-    install -d -m 755 "$target_bin_dir"
-
-    chown "$target_uid:$target_gid" "$target_local_dir" "$target_bin_dir"
-}
-
 initialize_persistence_layout() {
     install -d -m 777 "$PERSIST_ROOT"
-    initialize_target_local_bin
     target_uid="$(stat -c '%u' "$TARGET_HOME")"
     target_gid="$(stat -c '%g' "$TARGET_HOME")"
 
     for persist_dir_name in \
-        "bin" \
         "claude" \
         "codex" \
         "gemini" \
@@ -81,70 +67,6 @@ link_persistence() {
     ln -s "$persist_dir" "$target_path"
 }
 
-install_persistent_bin_sync_command() {
-    sync_cmd_path="/usr/local/bin/persistence-sync-bin"
-
-    cat <<'EOF' > "$sync_cmd_path"
-#!/bin/sh
-set -e
-
-persist_bin_dir="/usr/local/share/persistence/bin"
-persist_root_dir="/usr/local/share/persistence"
-
-ensure_persistence_layout() {
-    mkdir -p "$persist_root_dir"
-    chmod 777 "$persist_root_dir" || true
-
-    for persist_dir_name in \
-        "bin" \
-        "claude" \
-        "codex" \
-        "gemini" \
-        "google-vscode-extension" \
-        "cloud-code" \
-        "copilot-cli" \
-        "gh-cli" \
-        "opencode-config" \
-        "opencode-local-share"
-    do
-        persist_path="$persist_root_dir/$persist_dir_name"
-        mkdir -p "$persist_path"
-        chmod 777 "$persist_path" || true
-    done
-}
-
-ensure_persistence_layout
-
-if [ -z "$HOME" ] || [ ! -d "$persist_bin_dir" ]; then
-    exit 0
-fi
-
-target_bin_dir="$HOME/.local/bin"
-mkdir -p "$target_bin_dir"
-
-for src_path in "$persist_bin_dir"/*; do
-    if [ ! -e "$src_path" ] && [ ! -L "$src_path" ]; then
-        continue
-    fi
-
-    if [ -d "$src_path" ]; then
-        continue
-    fi
-
-    bin_name="$(basename "$src_path")"
-    dest_path="$target_bin_dir/$bin_name"
-
-    if [ -e "$dest_path" ] || [ -L "$dest_path" ]; then
-        continue
-    fi
-
-    ln -s "$src_path" "$dest_path"
-done
-EOF
-
-    chmod 755 "$sync_cmd_path"
-}
-
 initialize_persistence_layout
 
 if is_enabled "${CLAUDE:-false}"; then
@@ -173,5 +95,3 @@ if is_enabled "${OPENCODE:-false}"; then
     link_persistence "opencode-config" ".config/opencode"
     link_persistence "opencode-local-share" ".local/share/opencode"
 fi
-
-install_persistent_bin_sync_command

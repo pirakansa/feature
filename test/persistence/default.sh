@@ -23,10 +23,6 @@ source dev-container-features-test-lib
 # The 'check' command comes from the dev-container-features-test-lib. Syntax is...
 # check <LABEL> <cmd> [args...]
 check "runs as vscode" bash -c "[ \"$(id -un)\" = \"vscode\" ]"
-check "vscode local bin exists" bash -c "[ -d /home/vscode/.local/bin ]"
-check "vscode local bin owner" bash -c "[ \"$(stat -c '%U:%G' /home/vscode/.local/bin)\" = \"vscode:vscode\" ]"
-check "vscode bin directory is not linked as entry" bash -c "[ ! -e /home/vscode/.local/bin/bin ] && [ ! -L /home/vscode/.local/bin/bin ]"
-check "vscode persistent bin entries are linked" bash -c "for src_path in /usr/local/share/persistence/bin/*; do [ -e \"$src_path\" ] || [ -L \"$src_path\" ] || continue; [ -d \"$src_path\" ] && continue; bin_name=\"$(basename \"$src_path\")\"; dest_path=\"/home/vscode/.local/bin/$bin_name\"; [ -L \"$dest_path\" ] && [ \"$(readlink \"$dest_path\")\" = \"$src_path\" ] || exit 1; done"
 check "codex symlink exists" bash -c "[ -L /home/vscode/.codex ]"
 check "codex symlink target" bash -c "[ \"$(readlink /home/vscode/.codex)\" = \"/usr/local/share/persistence/codex\" ]"
 

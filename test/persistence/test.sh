@@ -25,7 +25,6 @@ source dev-container-features-test-lib
 # The 'check' command comes from the dev-container-features-test-lib. Syntax is...
 # check <LABEL> <cmd> [args...]
 check "persistence root exists" bash -c "[ -d /usr/local/share/persistence ]"
-check "persistence bin exists" bash -c "[ -d /usr/local/share/persistence/bin ]"
 check "persistence claude exists" bash -c "[ -d /usr/local/share/persistence/claude ]"
 check "persistence codex exists" bash -c "[ -d /usr/local/share/persistence/codex ]"
 check "persistence gemini exists" bash -c "[ -d /usr/local/share/persistence/gemini ]"
@@ -35,8 +34,6 @@ check "persistence copilot-cli exists" bash -c "[ -d /usr/local/share/persistenc
 check "persistence gh-cli exists" bash -c "[ -d /usr/local/share/persistence/gh-cli ]"
 check "persistence opencode-config exists" bash -c "[ -d /usr/local/share/persistence/opencode-config ]"
 check "persistence opencode-local-share exists" bash -c "[ -d /usr/local/share/persistence/opencode-local-share ]"
-check "user local bin exists" bash -c "[ -d \"$HOME/.local/bin\" ]"
-check "user local bin owner" bash -c 'owner="$(stat -c "%U:%G" "$HOME/.local/bin")"; [ "$owner" = "$(id -un):$(id -gn)" ]'
 
 # Report results
 # If any of the checks above exited with a non-zero exit code, the test will fail.

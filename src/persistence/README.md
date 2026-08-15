@@ -1,13 +1,12 @@
 
 # Persistence (`persistence`)
 
-A Dev Container Feature that persists AI tool configurations, credentials, and custom executables across container rebuilds.
+A Dev Container Feature that persists AI tool configurations and credentials across container rebuilds.
 Data is stored in a named Docker volume (`persistence`) and survives container recreation.
 
 ## How It Works
 
-1. **At install time**: Creates `/usr/local/share/persistence/<name>` directories and symlinks them to the corresponding paths in the home directory.
-2. **At container start** (`postStartCommand`): Symlinks executables found in `/usr/local/share/persistence/bin/` into `~/.local/bin/`. Existing files are not overwritten.
+At install time, the feature creates `/usr/local/share/persistence/<name>` directories and symlinks them to the corresponding paths in the home directory.
 
 If a target path already exists (for example `~/.codex` or `~/.config/gh`), this feature skips creating that symlink and leaves the existing path unchanged.
 
@@ -39,7 +38,6 @@ If a target path already exists (for example `~/.codex` or `~/.config/gh`), this
 
 ```
 /usr/local/share/persistence/   ← Docker volume mount point
-  bin/                          ← Place custom executables to persist here
   claude/                       ← Linked to ~/.claude
   codex/                        ← Linked to ~/.codex
   gemini/                       ← Linked to ~/.gemini
@@ -50,17 +48,6 @@ If a target path already exists (for example `~/.codex` or `~/.config/gh`), this
   opencode-config/              ← Linked to ~/.config/opencode
   opencode-local-share/         ← Linked to ~/.local/share/opencode
 ```
-
-## Persistent bin (`persistence/bin`)
-
-Files placed in `/usr/local/share/persistence/bin/` are automatically symlinked into `~/.local/bin/` at container start.
-
-- Existing files at `~/.local/bin/<name>` will not be overwritten.
-- Ensure `~/.local/bin` is included in your PATH:
-  ```sh
-  export PATH="$HOME/.local/bin:$PATH"
-  ```
-- If you add files after the container has started, restart the container to re-sync the links.
 
 ---
 

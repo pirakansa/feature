@@ -41,6 +41,5 @@
             "target": "/usr/local/share/persistence",
             "type": "volume"
         }
-    ],
-    "postStartCommand": "/usr/local/bin/persistence-sync-bin"
+    ]
 }
