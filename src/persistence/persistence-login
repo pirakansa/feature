@@ -1,0 +1,126 @@
+#!/bin/sh
+set -eu
+
+PERSIST_ROOT="${PERSIST_ROOT:-/usr/local/share/persistence}"
+
+usage() {
+    cat <<'EOF'
+Usage: persistence-login <save|restore> <codex|copilot-cli|gh-cli>
+EOF
+}
+
+if [ "$#" -eq 1 ] && [ "$1" = "--help" ]; then
+    usage
+    exit 0
+fi
+
+if [ "$#" -ne 2 ]; then
+    usage >&2
+    exit 1
+fi
+
+action="$1"
+tool="$2"
+
+case "$tool" in
+    codex)
+        relative_path=".codex/auth.json"
+        persisted_path="$PERSIST_ROOT/codex/auth.json"
+        ;;
+    copilot-cli)
+        relative_path=".copilot/config.json"
+        persisted_path="$PERSIST_ROOT/copilot-cli/config.json"
+        ;;
+    gh-cli)
+        relative_path=".config/gh/hosts.yml"
+        persisted_path="$PERSIST_ROOT/gh-cli/hosts.yml"
+        ;;
+    *)
+        usage >&2
+        exit 1
+        ;;
+esac
+
+target_path="$HOME/$relative_path"
+
+copy_login_file() {
+    source_path="$1"
+    destination_path="$2"
+    destination_parent="$(dirname "$destination_path")"
+
+    if [ ! -d "$destination_parent" ]; then
+        (umask 077 && mkdir -p "$destination_parent")
+    fi
+
+    if [ -e "$destination_path" ] && cmp -s "$source_path" "$destination_path"; then
+        return 0
+    fi
+
+    temporary_path="$destination_path.tmp.$$"
+    umask 077
+    cp "$source_path" "$temporary_path"
+    chmod 600 "$temporary_path"
+    mv -f "$temporary_path" "$destination_path"
+}
+
+save_codex_login() {
+    if [ ! -f "$target_path" ]; then
+        echo "Login file not found: $target_path" >&2
+        exit 1
+    fi
+
+    copy_login_file "$target_path" "$persisted_path"
+
+    if [ -L "$target_path" ]; then
+        rm "$target_path"
+        copy_login_file "$persisted_path" "$target_path"
+    fi
+}
+
+restore_codex_login() {
+    if [ ! -f "$persisted_path" ]; then
+        echo "No saved login state for codex" >&2
+        exit 1
+    fi
+
+    target_parent="$(dirname "$target_path")"
+    if [ ! -d "$target_parent" ]; then
+        (umask 077 && mkdir -p "$target_parent")
+    fi
+
+    if [ -L "$target_path" ] && [ "$(readlink "$target_path")" = "$persisted_path" ]; then
+        return 0
+    fi
+
+    rm -f "$target_path"
+    ln -s "$persisted_path" "$target_path"
+}
+
+case "$action" in
+    save)
+        if [ "$tool" = "codex" ]; then
+            save_codex_login
+        else
+            if [ ! -f "$target_path" ]; then
+                echo "Login file not found: $target_path" >&2
+                exit 1
+            fi
+            copy_login_file "$target_path" "$persisted_path"
+        fi
+        ;;
+    restore)
+        if [ "$tool" = "codex" ]; then
+            restore_codex_login
+        else
+            if [ ! -f "$persisted_path" ]; then
+                echo "No saved login state for $tool" >&2
+                exit 1
+            fi
+            copy_login_file "$persisted_path" "$target_path"
+        fi
+        ;;
+    *)
+        usage >&2
+        exit 1
+        ;;
+esac

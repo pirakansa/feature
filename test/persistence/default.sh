@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Scenario test: Verifies persistence when codex=true and remoteUser=vscode.
+# Scenario test: Verifies manual Codex login-state persistence as remoteUser=vscode.
 # Corresponds to the "default" scenario in scenarios.json.
 #
 # How to run:
@@ -23,8 +23,10 @@ source dev-container-features-test-lib
 # The 'check' command comes from the dev-container-features-test-lib. Syntax is...
 # check <LABEL> <cmd> [args...]
 check "runs as vscode" bash -c "[ \"$(id -un)\" = \"vscode\" ]"
-check "codex symlink exists" bash -c "[ -L /home/vscode/.codex ]"
-check "codex symlink target" bash -c "[ \"$(readlink /home/vscode/.codex)\" = \"/usr/local/share/persistence/codex\" ]"
+check "persistence-login help" persistence-login --help
+check "saves, links, and detaches Codex login state" bash -c "set -e; export HOME=/tmp/persistence-test-home PERSIST_ROOT=/tmp/persistence-test-volume; mkdir -p \"\$HOME/.codex\"; printf '%s' local-token > \"\$HOME/.codex/auth.json\"; persistence-login save codex; [ ! -L \"\$HOME/.codex/auth.json\" ]; persistence-login restore codex; [ -L \"\$HOME/.codex/auth.json\" ]; [ \"\$(readlink \"\$HOME/.codex/auth.json\")\" = \"\$PERSIST_ROOT/codex/auth.json\" ]; printf '%s' shared-token > \"\$PERSIST_ROOT/codex/auth.json\"; [ \"\$(cat \"\$HOME/.codex/auth.json\")\" = shared-token ]; persistence-login save codex; [ ! -L \"\$HOME/.codex/auth.json\" ]; [ \"\$(cat \"\$HOME/.codex/auth.json\")\" = shared-token ]"
+check "saves and restores Copilot CLI login state" bash -c "set -e; export HOME=/tmp/persistence-test-home PERSIST_ROOT=/tmp/persistence-test-volume; mkdir -p \"\$HOME/.copilot\"; printf '%s' test-token > \"\$HOME/.copilot/config.json\"; persistence-login save copilot-cli; rm \"\$HOME/.copilot/config.json\"; persistence-login restore copilot-cli; [ \"\$(cat \"\$HOME/.copilot/config.json\")\" = test-token ]"
+check "saves and restores GitHub CLI login state" bash -c "set -e; export HOME=/tmp/persistence-test-home PERSIST_ROOT=/tmp/persistence-test-volume; mkdir -p \"\$HOME/.config/gh\"; printf '%s' test-token > \"\$HOME/.config/gh/hosts.yml\"; persistence-login save gh-cli; rm \"\$HOME/.config/gh/hosts.yml\"; persistence-login restore gh-cli; [ \"\$(cat \"\$HOME/.config/gh/hosts.yml\")\" = test-token ]"
 
 # Report results
 # If any of the checks above exited with a non-zero exit code, the test will fail.

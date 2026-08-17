@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Auto-generated test: Verifies persistence installed with all options set to their default values (false).
-#
-# All options from devcontainer-feature.json are applied with their default values.
-# That is, claude/codex/gemini/copilot-cli/gh-cli/opencode are all disabled (false).
+# Auto-generated test: Verifies the manual login-state persistence command is installed.
 #
 # How to run:
 #   devcontainer features test \
@@ -25,15 +22,7 @@ source dev-container-features-test-lib
 # The 'check' command comes from the dev-container-features-test-lib. Syntax is...
 # check <LABEL> <cmd> [args...]
 check "persistence root exists" bash -c "[ -d /usr/local/share/persistence ]"
-check "persistence claude exists" bash -c "[ -d /usr/local/share/persistence/claude ]"
-check "persistence codex exists" bash -c "[ -d /usr/local/share/persistence/codex ]"
-check "persistence gemini exists" bash -c "[ -d /usr/local/share/persistence/gemini ]"
-check "persistence google-vscode-extension exists" bash -c "[ -d /usr/local/share/persistence/google-vscode-extension ]"
-check "persistence cloud-code exists" bash -c "[ -d /usr/local/share/persistence/cloud-code ]"
-check "persistence copilot-cli exists" bash -c "[ -d /usr/local/share/persistence/copilot-cli ]"
-check "persistence gh-cli exists" bash -c "[ -d /usr/local/share/persistence/gh-cli ]"
-check "persistence opencode-config exists" bash -c "[ -d /usr/local/share/persistence/opencode-config ]"
-check "persistence opencode-local-share exists" bash -c "[ -d /usr/local/share/persistence/opencode-local-share ]"
+check "persistence-login is installed" bash -c "[ -x /usr/local/bin/persistence-login ]"
 
 # Report results
 # If any of the checks above exited with a non-zero exit code, the test will fail.
