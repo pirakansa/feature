@@ -5,7 +5,7 @@ PERSIST_ROOT="${PERSIST_ROOT:-/usr/local/share/persistence}"
 
 usage() {
     cat <<'EOF'
-Usage: persistence-login <save|restore> <codex|copilot-cli|gh-cli>
+Usage: persistence-login <save|restore> <claude|codex|copilot-cli|gh-cli>
 EOF
 }
 
@@ -26,6 +26,10 @@ case "$tool" in
     codex)
         relative_path=".codex/auth.json"
         persisted_path="$PERSIST_ROOT/codex/auth.json"
+        ;;
+    claude)
+        relative_path=".claude/.credentials.json"
+        persisted_path="$PERSIST_ROOT/claude/.credentials.json"
         ;;
     copilot-cli)
         relative_path=".copilot/config.json"
@@ -63,7 +67,7 @@ copy_login_file() {
     mv -f "$temporary_path" "$destination_path"
 }
 
-save_codex_login() {
+save_linked_login() {
     if [ ! -f "$target_path" ]; then
         echo "Login file not found: $target_path" >&2
         exit 1
@@ -77,9 +81,9 @@ save_codex_login() {
     fi
 }
 
-restore_codex_login() {
+restore_linked_login() {
     if [ ! -f "$persisted_path" ]; then
-        echo "No saved login state for codex" >&2
+        echo "No saved login state for $tool" >&2
         exit 1
     fi
 
@@ -98,26 +102,28 @@ restore_codex_login() {
 
 case "$action" in
     save)
-        if [ "$tool" = "codex" ]; then
-            save_codex_login
-        else
-            if [ ! -f "$target_path" ]; then
-                echo "Login file not found: $target_path" >&2
-                exit 1
-            fi
-            copy_login_file "$target_path" "$persisted_path"
-        fi
+        case "$tool" in
+            codex|claude) save_linked_login ;;
+            *)
+                if [ ! -f "$target_path" ]; then
+                    echo "Login file not found: $target_path" >&2
+                    exit 1
+                fi
+                copy_login_file "$target_path" "$persisted_path"
+                ;;
+        esac
         ;;
     restore)
-        if [ "$tool" = "codex" ]; then
-            restore_codex_login
-        else
-            if [ ! -f "$persisted_path" ]; then
-                echo "No saved login state for $tool" >&2
-                exit 1
-            fi
-            copy_login_file "$persisted_path" "$target_path"
-        fi
+        case "$tool" in
+            codex|claude) restore_linked_login ;;
+            *)
+                if [ ! -f "$persisted_path" ]; then
+                    echo "No saved login state for $tool" >&2
+                    exit 1
+                fi
+                copy_login_file "$persisted_path" "$target_path"
+                ;;
+        esac
         ;;
     *)
         usage >&2
