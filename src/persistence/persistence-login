@@ -5,7 +5,7 @@ PERSIST_ROOT="${PERSIST_ROOT:-/usr/local/share/persistence}"
 
 usage() {
     cat <<'EOF'
-Usage: persistence-login <save|restore> <claude|codex|copilot-cli|gh-cli>
+Usage: persistence-login <save|restore> <codex|copilot-cli|gh-cli>
 EOF
 }
 
@@ -26,10 +26,6 @@ case "$tool" in
     codex)
         relative_path=".codex/auth.json"
         persisted_path="$PERSIST_ROOT/codex/auth.json"
-        ;;
-    claude)
-        relative_path=".claude/.credentials.json"
-        persisted_path="$PERSIST_ROOT/claude/.credentials.json"
         ;;
     copilot-cli)
         relative_path=".copilot/config.json"
@@ -103,7 +99,7 @@ restore_linked_login() {
 case "$action" in
     save)
         case "$tool" in
-            codex|claude) save_linked_login ;;
+            codex) save_linked_login ;;
             *)
                 if [ ! -f "$target_path" ]; then
                     echo "Login file not found: $target_path" >&2
@@ -115,7 +111,7 @@ case "$action" in
         ;;
     restore)
         case "$tool" in
-            codex|claude) restore_linked_login ;;
+            codex) restore_linked_login ;;
             *)
                 if [ ! -f "$persisted_path" ]; then
                     echo "No saved login state for $tool" >&2

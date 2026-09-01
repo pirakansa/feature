@@ -6,9 +6,9 @@ Data is stored in the `persistence` volume and survives container recreation.
 
 ## How It Works
 
-The feature mounts the volume at `/usr/local/share/persistence` and installs the `persistence-login` command. It does not alter Copilot CLI or GitHub CLI configuration files. For Codex and Claude, `restore` replaces the credential file with a symlink to the shared login-state file.
+The feature mounts the volume at `/usr/local/share/persistence` and installs the `persistence-login` command. It does not alter Copilot CLI or GitHub CLI configuration files. For Codex, `restore` replaces `~/.codex/auth.json` with a symlink to the shared login-state file.
 
-Use `save` after signing in to save login state. It keeps Codex and Claude authentication local, so it can be updated independently. Use `restore` after creating a new container to restore it; for Codex and Claude, this also shares subsequent token updates with every container restored from the same volume.
+Use `save` after signing in to save login state. It keeps Codex authentication local, so it can be updated independently. Use `restore` after creating a new container to restore it; for Codex, this also shares subsequent token updates with every container restored from the same volume.
 
 ## Usage
 
@@ -22,7 +22,6 @@ Use `save` after signing in to save login state. It keeps Codex and Claude authe
 
 ```sh
 persistence-login save codex
-persistence-login save claude
 persistence-login save copilot-cli
 persistence-login save gh-cli
 ```
@@ -31,7 +30,6 @@ persistence-login save gh-cli
 
 ```sh
 persistence-login restore codex
-persistence-login restore claude
 persistence-login restore copilot-cli
 persistence-login restore gh-cli
 ```
@@ -41,7 +39,6 @@ persistence-login restore gh-cli
 | Tool | Login-state file |
 |------|------------------|
 | Codex CLI | `~/.codex/auth.json` (linked to the volume by `restore`) |
-| Claude Code | `~/.claude/.credentials.json` (linked to the volume by `restore`) |
 | GitHub Copilot CLI | `~/.copilot/config.json` |
 | GitHub CLI | `~/.config/gh/hosts.yml` |
 
@@ -51,8 +48,6 @@ persistence-login restore gh-cli
 /usr/local/share/persistence/   ← Docker volume mount point
   codex/
     auth.json                   ← Linked from ~/.codex/auth.json after restore
-  claude/
-    .credentials.json           ← Linked from ~/.claude/.credentials.json after restore
   copilot-cli/
     config.json                 ← Copied from ~/.copilot/config.json
   gh-cli/
