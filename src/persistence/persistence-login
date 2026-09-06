@@ -5,7 +5,7 @@ PERSIST_ROOT="${PERSIST_ROOT:-/usr/local/share/persistence}"
 
 usage() {
     cat <<'EOF'
-Usage: persistence-login <save|restore> <codex|copilot-cli|gh-cli>
+Usage: persistence-login <save|restore> <claude|codex|copilot-cli|gh-cli>
 EOF
 }
 
@@ -26,6 +26,12 @@ case "$tool" in
     codex)
         relative_path=".codex/auth.json"
         persisted_path="$PERSIST_ROOT/codex/auth.json"
+        ;;
+    claude)
+        relative_path=".claude/.credentials.json"
+        persisted_path="$PERSIST_ROOT/claude/.credentials.json"
+        claude_config_path="$HOME/.claude.json"
+        persisted_claude_config_path="$PERSIST_ROOT/claude/.claude.json"
         ;;
     copilot-cli)
         relative_path=".copilot/config.json"
@@ -100,6 +106,18 @@ case "$action" in
     save)
         case "$tool" in
             codex) save_linked_login ;;
+            claude)
+                if [ ! -f "$target_path" ]; then
+                    echo "Login file not found: $target_path" >&2
+                    exit 1
+                fi
+                if [ ! -f "$claude_config_path" ]; then
+                    echo "Login file not found: $claude_config_path" >&2
+                    exit 1
+                fi
+                copy_login_file "$target_path" "$persisted_path"
+                copy_login_file "$claude_config_path" "$persisted_claude_config_path"
+                ;;
             *)
                 if [ ! -f "$target_path" ]; then
                     echo "Login file not found: $target_path" >&2
@@ -112,6 +130,18 @@ case "$action" in
     restore)
         case "$tool" in
             codex) restore_linked_login ;;
+            claude)
+                if [ ! -f "$persisted_path" ]; then
+                    echo "No saved login state for $tool" >&2
+                    exit 1
+                fi
+                if [ ! -f "$persisted_claude_config_path" ]; then
+                    echo "No saved login state for $tool" >&2
+                    exit 1
+                fi
+                copy_login_file "$persisted_path" "$target_path"
+                copy_login_file "$persisted_claude_config_path" "$claude_config_path"
+                ;;
             *)
                 if [ ! -f "$persisted_path" ]; then
                     echo "No saved login state for $tool" >&2

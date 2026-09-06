@@ -6,7 +6,7 @@ Data is stored in the `persistence` volume and survives container recreation.
 
 ## How It Works
 
-The feature mounts the volume at `/usr/local/share/persistence` and installs the `persistence-login` command. It does not alter Copilot CLI or GitHub CLI configuration files. For Codex, `restore` replaces `~/.codex/auth.json` with a symlink to the shared login-state file.
+The feature mounts the volume at `/usr/local/share/persistence` and installs the `persistence-login` command. Login-state files are copied to and from the volume, except for Codex, whose `restore` replaces `~/.codex/auth.json` with a symlink to the shared login-state file.
 
 Use `save` after signing in to save login state. It keeps Codex authentication local, so it can be updated independently. Use `restore` after creating a new container to restore it; for Codex, this also shares subsequent token updates with every container restored from the same volume.
 
@@ -22,6 +22,7 @@ Use `save` after signing in to save login state. It keeps Codex authentication l
 
 ```sh
 persistence-login save codex
+persistence-login save claude
 persistence-login save copilot-cli
 persistence-login save gh-cli
 ```
@@ -30,6 +31,7 @@ persistence-login save gh-cli
 
 ```sh
 persistence-login restore codex
+persistence-login restore claude
 persistence-login restore copilot-cli
 persistence-login restore gh-cli
 ```
@@ -39,6 +41,7 @@ persistence-login restore gh-cli
 | Tool | Login-state file |
 |------|------------------|
 | Codex CLI | `~/.codex/auth.json` (linked to the volume by `restore`) |
+| Claude Code | `~/.claude/.credentials.json` and `~/.claude.json` |
 | GitHub Copilot CLI | `~/.copilot/config.json` |
 | GitHub CLI | `~/.config/gh/hosts.yml` |
 
@@ -48,6 +51,9 @@ persistence-login restore gh-cli
 /usr/local/share/persistence/   ← Docker volume mount point
   codex/
     auth.json                   ← Linked from ~/.codex/auth.json after restore
+  claude/
+    .credentials.json           ← Copied from ~/.claude/.credentials.json
+    .claude.json                ← Copied from ~/.claude.json
   copilot-cli/
     config.json                 ← Copied from ~/.copilot/config.json
   gh-cli/
