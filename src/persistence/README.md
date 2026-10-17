@@ -22,7 +22,6 @@ Use `save` after signing in to save login state. It keeps Codex authentication l
 
 ```sh
 persistence-login save codex
-persistence-login save claude
 persistence-login save copilot-cli
 persistence-login save gh-cli
 ```
@@ -31,7 +30,6 @@ persistence-login save gh-cli
 
 ```sh
 persistence-login restore codex
-persistence-login restore claude
 persistence-login restore copilot-cli
 persistence-login restore gh-cli
 ```
@@ -41,7 +39,6 @@ persistence-login restore gh-cli
 | Tool | Login-state file |
 |------|------------------|
 | Codex CLI | `~/.codex/auth.json` (linked to the volume by `restore`) |
-| Claude Code | `~/.claude/.credentials.json` and `~/.claude.json` |
 | GitHub Copilot CLI | `~/.copilot/config.json` |
 | GitHub CLI | `~/.config/gh/hosts.yml` |
 
@@ -51,9 +48,6 @@ persistence-login restore gh-cli
 /usr/local/share/persistence/   ← Docker volume mount point
   codex/
     auth.json                   ← Linked from ~/.codex/auth.json after restore
-  claude/
-    .credentials.json           ← Copied from ~/.claude/.credentials.json
-    .claude.json                ← Copied from ~/.claude.json
   copilot-cli/
     config.json                 ← Copied from ~/.copilot/config.json
   gh-cli/
