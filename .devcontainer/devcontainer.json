@@ -23,6 +23,8 @@
     "remoteEnv": {
         "PATH": "${containerEnv:PATH}:/home/node/.local/bin"
     },
+    "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+    "workspaceFolder": "${localWorkspaceFolder}",
     "remoteUser": "node",
     "updateContentCommand": "npm install -g @devcontainers/cli"
 }
