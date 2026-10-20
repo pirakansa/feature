@@ -1,0 +1,73 @@
+#!/bin/bash
+set -euo pipefail
+
+configure_git_identity() (
+    if [[ -n "${GIT_USER_NAME:-}" ]]; then
+        git config --global user.name "$GIT_USER_NAME"
+    fi
+    if [[ -n "${GIT_USER_EMAIL:-}" ]]; then
+        git config --global user.email "$GIT_USER_EMAIL"
+    fi
+
+)
+
+install_claude() (
+    [[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]] || return 0
+    if command -v claude >/dev/null 2>&1; then
+        return 0
+    fi
+    echo "Installing Claude Code..."
+    curl -fsSL https://claude.ai/install.sh | bash
+)
+
+verify_github_archive() (
+    local download_dir=$1 archive=$2
+    cd "$download_dir"
+    awk -v file="$archive" '
+        $2 == file { print; found = 1 }
+        END { if (!found) exit 1 }
+    ' checksums.txt > selected-checksum.txt
+    sha256sum -c selected-checksum.txt
+)
+
+# Isolate temporary files and the EXIT trap from the remaining setup steps.
+install_github_cli() (
+    [[ -n "${GH_TOKEN:-}" ]] || return 0
+    if command -v gh >/dev/null 2>&1; then
+        return 0
+    fi
+    local arch download_dir release_url version archive base_url
+    echo "Installing GitHub CLI..."
+    case "$(uname -m)" in
+        x86_64) arch=amd64 ;;
+        aarch64|arm64) arch=arm64 ;;
+        *) echo "Unsupported GitHub CLI architecture: $(uname -m)" >&2; exit 1 ;;
+    esac
+    download_dir=$(mktemp -d)
+    trap 'rm -rf "$download_dir"' EXIT
+    # Resolve the official release without passing GH_TOKEN to the downloader.
+    release_url=$(curl -fsSL -o /dev/null -w '%{url_effective}' https://github.com/cli/cli/releases/latest)
+    version=${release_url##*/v}
+    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "Could not resolve the GitHub CLI release." >&2
+        exit 1
+    fi
+    archive="gh_${version}_linux_${arch}.tar.gz"
+    base_url="https://github.com/cli/cli/releases/download/v${version}"
+    curl -fsSL "$base_url/$archive" -o "$download_dir/$archive"
+    curl -fsSL "$base_url/gh_${version}_checksums.txt" -o "$download_dir/checksums.txt"
+    verify_github_archive "$download_dir" "$archive"
+    tar -xzf "$download_dir/$archive" -C "$download_dir" "gh_${version}_linux_${arch}/bin/gh"
+    install -d "$HOME/.local/bin"
+    install -m 755 "$download_dir/gh_${version}_linux_${arch}/bin/gh" "$HOME/.local/bin/gh"
+)
+
+main() {
+    export PATH="$HOME/.local/bin:$PATH"
+    configure_git_identity
+    install_claude
+    install_github_cli
+    echo "persistence setup complete."
+}
+
+main "$@"
