@@ -5,5 +5,16 @@
         "features": {
             "persistence": {}
         }
+    },
+    "all_tools": {
+        "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+        "remoteUser": "vscode",
+        "features": {
+            "persistence": {
+                "claude": true,
+                "codex": true,
+                "gh": true
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@ test/
 
 | Feature | Description |
 |---------|-------------|
-| [`persistence`](src/persistence/README.md) | Persists user-space data such as AI tool configurations and credentials using a Docker volume |
+| [`persistence`](src/persistence/README.md) | Installs selected Claude Code, Codex, and GitHub CLIs and configures GitHub HTTPS access |
 
 ## Testing
 

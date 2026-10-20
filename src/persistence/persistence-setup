@@ -1,0 +1,36 @@
+#!/bin/bash
+set -euo pipefail
+source /usr/local/lib/persistence/common.sh
+
+configure_github_git() (
+    if ! tool_available gh >/dev/null 2>&1; then
+        return 0
+    fi
+
+    local key='url.https://github.com/.insteadOf' prefix
+    for prefix in 'git@github.com:' 'ssh://git@github.com/'; do
+        # Add only missing rules, preserving unrelated URL mappings.
+        local existing found=false
+        while IFS= read -r existing; do
+            if [[ "$existing" == "$prefix" ]]; then
+                found=true
+                break
+            fi
+        done < <(git config --global --get-all "$key" || :)
+        if [[ "$found" == false ]]; then
+            git config --global --add "$key" "$prefix"
+        fi
+    done
+
+    # Configure the helper before login; authentication remains interactive/manual.
+    gh auth setup-git --hostname github.com --force
+)
+
+main() {
+    export PATH="$HOME/.local/bin:$PATH"
+    /usr/local/bin/persistence-install-tools
+    configure_github_git
+    echo "persistence setup complete."
+}
+
+main "$@"
