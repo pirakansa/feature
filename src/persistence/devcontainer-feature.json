@@ -2,6 +2,23 @@
     "name": "persistence",
     "id": "persistence",
     "version": "2.0.0",
-    "description": "Set up CLI tools and Git identity from environment variables",
-    "onCreateCommand": "/usr/local/bin/persistence-setup"
+    "description": "Install selected agent CLIs and configure GitHub HTTPS access",
+    "onCreateCommand": "/usr/local/bin/persistence-setup",
+    "options": {
+        "claude": {
+            "type": "boolean",
+            "default": false,
+            "description": "Install Claude Code"
+        },
+        "codex": {
+            "type": "boolean",
+            "default": false,
+            "description": "Install Codex CLI"
+        },
+        "gh": {
+            "type": "boolean",
+            "default": false,
+            "description": "Install GitHub CLI"
+        }
+    }
 }

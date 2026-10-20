@@ -12,7 +12,7 @@ require_root() {
 install_prerequisites() (
     # Resolve prerequisites before setup runs as the unprivileged remote user.
     set --
-    for dependency in bash:bash curl:curl git:git tar:tar gzip:gzip awk:mawk sha256sum:coreutils install:coreutils mktemp:coreutils; do
+    for dependency in bash:bash curl:curl git:git tar:tar gzip:gzip awk:mawk sha256sum:coreutils readlink:coreutils install:coreutils mktemp:coreutils; do
         executable=${dependency%%:*}
         package=${dependency#*:}
         if ! command -v "$executable" >/dev/null 2>&1; then
@@ -44,25 +44,50 @@ install_setup_command() {
     install -m 755 persistence-setup /usr/local/bin/persistence-setup
 }
 
-configure_shell_path() {
-# Applies to interactive/login shells without embedding a user's home at build time.
-cat > /etc/profile.d/persistence-path.sh <<'EOF'
-case ":$PATH:" in
-    *":$HOME/.local/bin:"*) ;;
-    *) export PATH="$HOME/.local/bin:$PATH" ;;
-esac
+save_options() (
+    install -d -m 755 /usr/local/share/persistence
+    for option in CLAUDE CODEX GH; do
+        eval 'value=${'"$option"':-false}'
+        case "$value" in true|false) ;; *) echo "Invalid option: $option" >&2; exit 1 ;; esac
+        printf '%s=%s\n' "$option" "$value"
+    done > /usr/local/share/persistence/options.env
+    chmod 644 /usr/local/share/persistence/options.env
+)
+
+install_user_launchers() (
+    install -d -m 755 /usr/local/lib/persistence/shims
+    for tool in claude codex gh; do
+        # Keep existing system installations. Launchers resolve HOME at runtime,
+        # including for docker exec / Orca processes without shell initialization.
+        case "$tool" in
+            claude) enabled=${CLAUDE:-false} ;;
+            codex) enabled=${CODEX:-false} ;;
+            gh) enabled=${GH:-false} ;;
+        esac
+        if [ "$enabled" != true ]; then
+            continue
+        fi
+        if command -v "$tool" >/dev/null 2>&1; then
+            continue
+        fi
+        cat > "/usr/local/lib/persistence/shims/$tool" <<'EOF'
+#!/bin/sh
+exec "$HOME/.local/bin/${0##*/}" "$@"
 EOF
-# Bash interactive non-login shells do not read /etc/profile.d.
-if [ -f /etc/bash.bashrc ]; then
-    printf '\n. /etc/profile.d/persistence-path.sh\n' >> /etc/bash.bashrc
-fi
-}
+        chmod 755 "/usr/local/lib/persistence/shims/$tool"
+        ln -s "/usr/local/lib/persistence/shims/$tool" "/usr/local/bin/$tool"
+    done
+)
 
 main() {
     require_root
     install_prerequisites
     install_setup_command
-    configure_shell_path
+    install -m 755 persistence-install-tools /usr/local/bin/persistence-install-tools
+    install -d -m 755 /usr/local/lib/persistence
+    install -m 644 persistence-common.sh /usr/local/lib/persistence/common.sh
+    save_options
+    install_user_launchers
 }
 
 main "$@"

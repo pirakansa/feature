@@ -22,7 +22,7 @@ test/
 
 | Feature | Description |
 |---------|-------------|
-| [`persistence`](src/persistence/README.md) | Sets up Claude Code, GitHub CLI, and Git identity from environment variables |
+| [`persistence`](src/persistence/README.md) | Installs selected Claude Code, Codex, and GitHub CLIs and configures GitHub HTTPS access |
 
 ## Testing
 
